@@ -1,0 +1,40 @@
+name: Send Email
+
+on:
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  email:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+
+      - name: Install yagmail
+        run: pip install yagmail
+
+      - name: Send email
+        env:
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+        run: |
+          echo "
+import yagmail
+
+# Set up the Gmail account
+yag = yagmail.SMTP(user='${{ secrets.EMAIL_USER }}', password='${{ secrets.EMAIL_PASS }}')
+
+# List of recipients
+recipients = ['friend1@gmail.com', 'friend2@gmail.com']  # Add more if you want
+
+subject = '🔥 Hello from GitHub!'
+body = 'This email was sent automatically using GitHub + Gmail SMTP. Cool, right?'
+
+# Send the email to all recipients
+for r in recipients:
+    yag.send(to=r, subject=subject, contents=body)
+    print(f'Sent to {r}')
+" > send.py
+          python send.py
